@@ -7,43 +7,39 @@ pipeline {
     }
     
     environment {
-        // Define environment variables for Tomcat
-        WAR_FILE = 'target/roshambo.war' // Path to the generated WAR file (use forward slashes)
-        TOMCAT_URL = 'http://localhost:8082' // Tomcat server URL
-        TOMCAT_USER = 'kaziqra' // Tomcat Manager username
-        TOMCAT_PASSWORD = 'kaziqra9867' // Tomcat Manager password
+        WAR_FILE = 'target/roshambo.war'
+        TOMCAT_URL = 'http://localhost:8082'
+        TOMCAT_USER = 'kaziqra'
+        TOMCAT_PASSWORD = 'kaziqra9867'
     }
     
     stages {
         stage('Clean Project') {
             steps {
-                bat "mvn clean"
+                bat "mvn clean" // change to "sh" if on Linux/Mac
             }
         }
 
         stage('Build Project') {
             steps {
-                bat "mvn package"
+                bat "mvn package" // change to "sh" if on Linux/Mac
             }
         }
 
         stage('Deploy to Tomcat') {
             steps {
                 script {
-		    //in this case it will be C:\ProgramData\Jenkins\.jenkins\workspace\war-deploy-jenkins-tomcat
-                    def warFilePath = "${WORKSPACE}/${WAR_FILE}" // Use forward slashes in path
+                    def warFilePath = "${WORKSPACE}/${WAR_FILE}"
                     echo "WAR file path: ${warFilePath}"
                     
-                    // Check if the WAR file exists before deploying
                     if (fileExists(warFilePath)) {
                         echo 'WAR file found, proceeding with deployment...'
                         
-                        // Deploy the WAR file to Tomcat using curl and Tomcat Manager API
                         bat """
                             curl --upload-file "${warFilePath}" \
-                            --user ${TOMCAT_USER}:${TOMCAT_PASSWORD} \
+                            --user "${TOMCAT_USER}:${TOMCAT_PASSWORD}" \
                             "${TOMCAT_URL}/manager/text/deploy?path=/roshambo&update=true"
-                        """
+                        """ // change to "sh" if on Linux/Mac
                     } else {
                         error('WAR file not found! Build might have failed.')
                     }
